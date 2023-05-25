@@ -217,12 +217,12 @@ class _VideoEditorState extends State<VideoEditor> {
                                   margin: const EdgeInsets.only(top: 10),
                                   child: Column(
                                     children: [
-                                      TabBar(
+                                      const TabBar(
                                         tabs: [
                                           Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.center,
-                                              children: const [
+                                              children: [
                                                 Padding(
                                                     padding: EdgeInsets.all(5),
                                                     child: Icon(
@@ -232,7 +232,7 @@ class _VideoEditorState extends State<VideoEditor> {
                                           Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.center,
-                                            children: const [
+                                            children: [
                                               Padding(
                                                   padding: EdgeInsets.all(5),
                                                   child:

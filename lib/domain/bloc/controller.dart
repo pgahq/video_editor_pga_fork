@@ -353,10 +353,6 @@ class VideoEditorController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Returns the ffmpeg command to apply the trim start and end parameters
-  /// [see ffmpeg doc](https://trac.ffmpeg.org/wiki/Seeking#Cuttingsmallsections)
-  String get _trimCmd => "-ss $_trimStart -to $_trimEnd";
-
   /// Get the [isTrimmed]
   ///
   /// `true` if the trimmed value has beem changed
@@ -484,8 +480,24 @@ class VideoEditorController extends ChangeNotifier {
   // EXPORT //
   //--------//
 
-  /// Returns the output path of the exported file
-  Future<String> _getOutputPath({
+  /// Returns the output path of the exported video file
+  Future<String> _getVideoOutputPath({
+    required File file,
+    String? name,
+    String? outputDirectory,
+  }) async {
+    // TODO: parse filePath for format extension
+    final extension = file.uri.pathSegments.last.split('.').last;
+
+    final String tempPath =
+        outputDirectory ?? (await getTemporaryDirectory()).path;
+    name ??= path.basenameWithoutExtension(file.path);
+    final int epoch = DateTime.now().millisecondsSinceEpoch;
+    return "$tempPath/${name}_$epoch.$extension";
+  }
+
+  /// Returns the output path of the exported cover
+  Future<String> _getCoverOutputPath({
     required String filePath,
     String? name,
     String? outputDirectory,
@@ -560,28 +572,19 @@ class VideoEditorController extends ChangeNotifier {
     void Function(Object, StackTrace)? onError,
     String? name,
     String? outDir,
-    VideoExportFormat format = VideoExportFormat.mp4,
     double scale = 1.0,
     String? customInstruction,
     void Function(Statistics, double)? onProgress,
     VideoExportPreset preset = VideoExportPreset.none,
     bool isFiltersEnabled = true,
   }) async {
-    final String videoPath = file.path;
-    final String outputPath = await _getOutputPath(
-      filePath: videoPath,
+    final String outputPath = await _getVideoOutputPath(
+      file: file,
       name: name,
       outputDirectory: outDir,
-      format: format,
     );
-    final String filter = _getExportFilters(
-      videoFormat: format,
-      scale: scale,
-      isFiltersEnabled: isFiltersEnabled,
-    );
-    final String execute =
-        // ignore: unnecessary_string_escapes
-        " -i \'$videoPath\' ${customInstruction ?? ""} $filter ${_getPreset(preset)} $_trimCmd -y \"$outputPath\"";
+    final trimCmd = "-ss $_trimStart -to $_trimEnd";
+    final String execute = ' -i ${file.path} $trimCmd -c copy $outputPath';
 
     debugPrint('VideoEditor - run export video command : [$execute]');
 
@@ -616,48 +619,6 @@ class VideoEditorController extends ChangeNotifier {
             }
           : null,
     );
-  }
-
-  /// Convert [VideoExportPreset] to ffmpeg preset as a [String], [More info about presets](https://trac.ffmpeg.org/wiki/Encode/H.264)
-  ///
-  /// Return [String] in `-preset xxx` format
-  String _getPreset(VideoExportPreset preset) {
-    String? newPreset = "";
-
-    switch (preset) {
-      case VideoExportPreset.ultrafast:
-        newPreset = "ultrafast";
-        break;
-      case VideoExportPreset.superfast:
-        newPreset = "superfast";
-        break;
-      case VideoExportPreset.veryfast:
-        newPreset = "veryfast";
-        break;
-      case VideoExportPreset.faster:
-        newPreset = "faster";
-        break;
-      case VideoExportPreset.fast:
-        newPreset = "fast";
-        break;
-      case VideoExportPreset.medium:
-        newPreset = "medium";
-        break;
-      case VideoExportPreset.slow:
-        newPreset = "slow";
-        break;
-      case VideoExportPreset.slower:
-        newPreset = "slower";
-        break;
-      case VideoExportPreset.veryslow:
-        newPreset = "veryslow";
-        break;
-      case VideoExportPreset.none:
-        newPreset = "";
-        break;
-    }
-
-    return newPreset.isEmpty ? "" : "-preset $newPreset";
   }
 
   /// Generate this selected cover image as a JPEG [File]
@@ -718,7 +679,7 @@ class VideoEditorController extends ChangeNotifier {
       }
       return;
     }
-    final String outputPath = await _getOutputPath(
+    final String outputPath = await _getCoverOutputPath(
       filePath: coverPath,
       name: name,
       outputDirectory: outDir,
