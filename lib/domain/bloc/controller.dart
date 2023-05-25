@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit_config.dart';
-import 'package:ffmpeg_kit_flutter_full/ffprobe_kit.dart';
-import 'package:ffmpeg_kit_flutter_full/return_code.dart';
-import 'package:ffmpeg_kit_flutter_full/statistics.dart';
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart';
+import 'package:ffmpeg_kit_flutter/ffprobe_kit.dart';
+import 'package:ffmpeg_kit_flutter/return_code.dart';
+import 'package:ffmpeg_kit_flutter/statistics.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:video_editor/domain/entities/file_format.dart';
@@ -39,7 +39,18 @@ enum RotateDirection { left, right }
 /// you will achieve better quality with a slower preset.
 /// Similarly, for constant quality encoding,
 /// you will simply save bitrate by choosing a slower preset.
-enum VideoExportPreset { none, ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow }
+enum VideoExportPreset {
+  none,
+  ultrafast,
+  superfast,
+  veryfast,
+  faster,
+  fast,
+  medium,
+  slow,
+  slower,
+  veryslow
+}
 
 /// The default value of this property `Offset(1.0, 1.0)`
 const Offset _max = Offset(1.0, 1.0);
@@ -77,7 +88,8 @@ class VideoEditorController extends ChangeNotifier {
           Platform.isIOS ? Uri.encodeFull(file.path) : file.path,
         )),
         trimStyle = trimStyle ?? TrimSliderStyle(),
-        assert(maxDuration > minDuration, 'The maximum duration must be bigger than the minimum duration');
+        assert(maxDuration > minDuration,
+            'The maximum duration must be bigger than the minimum duration');
 
   int _rotation = 0;
   bool _isTrimming = false;
@@ -100,7 +112,8 @@ class VideoEditorController extends ChangeNotifier {
   final VideoPlayerController _video;
 
   // Selected cover value
-  final ValueNotifier<CoverData?> _selectedCover = ValueNotifier<CoverData?>(null);
+  final ValueNotifier<CoverData?> _selectedCover =
+      ValueNotifier<CoverData?>(null);
 
   /// Get the [VideoPlayerController]
   VideoPlayerController get video => _video;
@@ -191,8 +204,10 @@ class VideoEditorController extends ChangeNotifier {
         height: newSize.height,
       );
 
-      _minCrop = Offset(centerCrop.left / videoWidth, centerCrop.top / videoHeight);
-      _maxCrop = Offset(centerCrop.right / videoWidth, centerCrop.bottom / videoHeight);
+      _minCrop =
+          Offset(centerCrop.left / videoWidth, centerCrop.top / videoHeight);
+      _maxCrop = Offset(
+          centerCrop.right / videoWidth, centerCrop.bottom / videoHeight);
       notifyListeners();
     }
   }
@@ -231,7 +246,8 @@ class VideoEditorController extends ChangeNotifier {
 
     // Trim straight away when maxDuration is lower than video duration
     if (maxDuration < videoDuration) {
-      updateTrim(0.0, maxDuration.inMilliseconds / videoDuration.inMilliseconds);
+      updateTrim(
+          0.0, maxDuration.inMilliseconds / videoDuration.inMilliseconds);
     } else {
       _updateTrimRange();
     }
@@ -289,7 +305,8 @@ class VideoEditorController extends ChangeNotifier {
   ///
   /// Arguments range are [Offset.zero] to `Offset(1.0, 1.0)`.
   void updateCrop(Offset min, Offset max) {
-    assert(min < max, 'Minimum crop value ($min) cannot be bigger and maximum crop value ($max)');
+    assert(min < max,
+        'Minimum crop value ($min) cannot be bigger and maximum crop value ($max)');
 
     _minCrop = min;
     _maxCrop = max;
@@ -307,10 +324,12 @@ class VideoEditorController extends ChangeNotifier {
   ///
   /// Arguments range are `0.0` to `1.0`.
   void updateTrim(double min, double max) {
-    assert(min < max, 'Minimum trim value ($min) cannot be bigger and maximum trim value ($max)');
+    assert(min < max,
+        'Minimum trim value ($min) cannot be bigger and maximum trim value ($max)');
 
     // check that the new params does not cause a wrong duration
-    final newDuration = Duration(milliseconds: (videoDuration.inMilliseconds * (max - min)).toInt());
+    final newDuration = Duration(
+        milliseconds: (videoDuration.inMilliseconds * (max - min)).toInt());
     assert(newDuration <= maxDuration && newDuration >= minDuration,
         'Trim duration ($newDuration) cannot be bigger than $maxDuration or smaller than $minDuration');
 
@@ -333,10 +352,6 @@ class VideoEditorController extends ChangeNotifier {
 
     notifyListeners();
   }
-
-  /// Returns the ffmpeg command to apply the trim start and end parameters
-  /// [see ffmpeg doc](https://trac.ffmpeg.org/wiki/Seeking#Cuttingsmallsections)
-  String get _trimCmd => "-ss $_trimStart -to $_trimEnd";
 
   /// Get the [isTrimmed]
   ///
@@ -369,7 +384,8 @@ class VideoEditorController extends ChangeNotifier {
   /// Get the [trimPosition], which is the videoPosition in the trim slider
   ///
   /// Range of the param is `0.0` to `1.0`.
-  double get trimPosition => videoPosition.inMilliseconds / videoDuration.inMilliseconds;
+  double get trimPosition =>
+      videoPosition.inMilliseconds / videoDuration.inMilliseconds;
 
   //-----------//
   //VIDEO COVER//
@@ -451,7 +467,9 @@ class VideoEditorController extends ChangeNotifier {
   //--------------//
 
   /// Return the metadata of the video [file] using Ffprobe
-  Future<void> getMetaData({required void Function(Map<dynamic, dynamic>? metadata) onCompleted}) async {
+  Future<void> getMetaData(
+      {required void Function(Map<dynamic, dynamic>? metadata)
+          onCompleted}) async {
     await FFprobeKit.getMediaInformationAsync(file.path, (session) async {
       final information = session.getMediaInformation();
       onCompleted(information?.getAllProperties());
@@ -462,14 +480,31 @@ class VideoEditorController extends ChangeNotifier {
   // EXPORT //
   //--------//
 
-  /// Returns the output path of the exported file
-  Future<String> _getOutputPath({
+  /// Returns the output path of the exported video file
+  Future<String> _getVideoOutputPath({
+    required File file,
+    String? name,
+    String? outputDirectory,
+  }) async {
+    // TODO: parse filePath for format extension
+    final extension = file.uri.pathSegments.last.split('.').last;
+
+    final String tempPath =
+        outputDirectory ?? (await getTemporaryDirectory()).path;
+    name ??= path.basenameWithoutExtension(file.path);
+    final int epoch = DateTime.now().millisecondsSinceEpoch;
+    return "$tempPath/${name}_$epoch.$extension";
+  }
+
+  /// Returns the output path of the exported cover
+  Future<String> _getCoverOutputPath({
     required String filePath,
     String? name,
     String? outputDirectory,
     required FileFormat format,
   }) async {
-    final String tempPath = outputDirectory ?? (await getTemporaryDirectory()).path;
+    final String tempPath =
+        outputDirectory ?? (await getTemporaryDirectory()).path;
     name ??= path.basenameWithoutExtension(filePath);
     final int epoch = DateTime.now().millisecondsSinceEpoch;
     return "$tempPath/${name}_$epoch.${format.extension}";
@@ -484,18 +519,24 @@ class VideoEditorController extends ChangeNotifier {
     if (!isFiltersEnabled) return "";
 
     // CALCULATE FILTERS
-    final bool isGif = videoFormat?.extension == VideoExportFormat.gif.extension;
-    final String scaleInstruction = scale == 1.0 ? "" : "scale=iw*$scale:ih*$scale";
+    final bool isGif =
+        videoFormat?.extension == VideoExportFormat.gif.extension;
+    final String scaleInstruction =
+        scale == 1.0 ? "" : "scale=iw*$scale:ih*$scale";
 
     // VALIDATE FILTERS
     final List<String> filters = [
       _getCrop(),
       scaleInstruction,
       _getRotation(),
-      isGif ? "fps=${videoFormat is GifExportFormat ? videoFormat.fps : VideoExportFormat.gif.fps}" : "",
+      isGif
+          ? "fps=${videoFormat is GifExportFormat ? videoFormat.fps : VideoExportFormat.gif.fps}"
+          : "",
     ];
     filters.removeWhere((item) => item.isEmpty);
-    return filters.isNotEmpty ? "-vf '${filters.join(",")}'${isGif ? " -loop 0" : ""}" : "";
+    return filters.isNotEmpty
+        ? "-vf '${filters.join(",")}'${isGif ? " -loop 0" : ""}"
+        : "";
   }
 
   /// Export the video using this edition parameters and return a `File`.
@@ -531,28 +572,19 @@ class VideoEditorController extends ChangeNotifier {
     void Function(Object, StackTrace)? onError,
     String? name,
     String? outDir,
-    VideoExportFormat format = VideoExportFormat.mp4,
     double scale = 1.0,
     String? customInstruction,
     void Function(Statistics, double)? onProgress,
     VideoExportPreset preset = VideoExportPreset.none,
     bool isFiltersEnabled = true,
   }) async {
-    final String videoPath = file.path;
-    final String outputPath = await _getOutputPath(
-      filePath: videoPath,
+    final String outputPath = await _getVideoOutputPath(
+      file: file,
       name: name,
       outputDirectory: outDir,
-      format: format,
     );
-    final String filter = _getExportFilters(
-      videoFormat: format,
-      scale: scale,
-      isFiltersEnabled: isFiltersEnabled,
-    );
-    final String execute =
-        // ignore: unnecessary_string_escapes
-        " -i \'$videoPath\' ${customInstruction ?? ""} $filter ${_getPreset(preset)} $_trimCmd -y \"$outputPath\"";
+    final trimCmd = "-ss $_trimStart -to $_trimEnd";
+    final String execute = ' -i ${file.path} $trimCmd -c copy $outputPath';
 
     debugPrint('VideoEditor - run export video command : [$execute]');
 
@@ -560,7 +592,8 @@ class VideoEditorController extends ChangeNotifier {
     FFmpegKit.executeAsync(
       execute,
       (session) async {
-        final state = FFmpegKitConfig.sessionStateToString(await session.getState());
+        final state =
+            FFmpegKitConfig.sessionStateToString(await session.getState());
         final code = await session.getReturnCode();
 
         if (ReturnCode.isSuccess(code)) {
@@ -568,7 +601,8 @@ class VideoEditorController extends ChangeNotifier {
         } else {
           if (onError != null) {
             onError(
-              Exception('FFmpeg process exited with state $state and return code $code.\n${await session.getOutput()}'),
+              Exception(
+                  'FFmpeg process exited with state $state and return code $code.\n${await session.getOutput()}'),
               StackTrace.current,
             );
           }
@@ -579,53 +613,12 @@ class VideoEditorController extends ChangeNotifier {
       onProgress != null
           ? (stats) {
               // Progress value of encoded video
-              double progressValue = stats.getTime() / trimmedDuration.inMilliseconds;
+              double progressValue =
+                  stats.getTime() / trimmedDuration.inMilliseconds;
               onProgress(stats, progressValue.clamp(0.0, 1.0));
             }
           : null,
     );
-  }
-
-  /// Convert [VideoExportPreset] to ffmpeg preset as a [String], [More info about presets](https://trac.ffmpeg.org/wiki/Encode/H.264)
-  ///
-  /// Return [String] in `-preset xxx` format
-  String _getPreset(VideoExportPreset preset) {
-    String? newPreset = "";
-
-    switch (preset) {
-      case VideoExportPreset.ultrafast:
-        newPreset = "ultrafast";
-        break;
-      case VideoExportPreset.superfast:
-        newPreset = "superfast";
-        break;
-      case VideoExportPreset.veryfast:
-        newPreset = "veryfast";
-        break;
-      case VideoExportPreset.faster:
-        newPreset = "faster";
-        break;
-      case VideoExportPreset.fast:
-        newPreset = "fast";
-        break;
-      case VideoExportPreset.medium:
-        newPreset = "medium";
-        break;
-      case VideoExportPreset.slow:
-        newPreset = "slow";
-        break;
-      case VideoExportPreset.slower:
-        newPreset = "slower";
-        break;
-      case VideoExportPreset.veryslow:
-        newPreset = "veryslow";
-        break;
-      case VideoExportPreset.none:
-        newPreset = "";
-        break;
-    }
-
-    return newPreset.isEmpty ? "" : "-preset $newPreset";
   }
 
   /// Generate this selected cover image as a JPEG [File]
@@ -686,13 +679,14 @@ class VideoEditorController extends ChangeNotifier {
       }
       return;
     }
-    final String outputPath = await _getOutputPath(
+    final String outputPath = await _getCoverOutputPath(
       filePath: coverPath,
       name: name,
       outputDirectory: outDir,
       format: format,
     );
-    final String filter = _getExportFilters(scale: scale, isFiltersEnabled: isFiltersEnabled);
+    final String filter =
+        _getExportFilters(scale: scale, isFiltersEnabled: isFiltersEnabled);
     // ignore: unnecessary_string_escapes
     final String execute = "-i \'$coverPath\' $filter -y $outputPath";
 
@@ -702,7 +696,8 @@ class VideoEditorController extends ChangeNotifier {
     FFmpegKit.executeAsync(
       execute,
       (session) async {
-        final state = FFmpegKitConfig.sessionStateToString(await session.getState());
+        final state =
+            FFmpegKitConfig.sessionStateToString(await session.getState());
         final code = await session.getReturnCode();
 
         if (ReturnCode.isSuccess(code)) {
@@ -710,7 +705,8 @@ class VideoEditorController extends ChangeNotifier {
         } else {
           if (onError != null) {
             onError(
-              Exception('FFmpeg process exited with state $state and return code $code.\n${await session.getOutput()}'),
+              Exception(
+                  'FFmpeg process exited with state $state and return code $code.\n${await session.getOutput()}'),
               StackTrace.current,
             );
           }
