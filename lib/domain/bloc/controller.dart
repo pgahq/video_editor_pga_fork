@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter/ffmpeg_kit_config.dart';
-import 'package:ffmpeg_kit_flutter/ffprobe_kit.dart';
-import 'package:ffmpeg_kit_flutter/return_code.dart';
-import 'package:ffmpeg_kit_flutter/statistics.dart';
+import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit_config.dart';
+import 'package:ffmpeg_kit_flutter_full/ffprobe_kit.dart';
+import 'package:ffmpeg_kit_flutter_full/return_code.dart';
+import 'package:ffmpeg_kit_flutter_full/statistics.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
 import 'package:video_editor/domain/entities/file_format.dart';
