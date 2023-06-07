@@ -584,7 +584,7 @@ class VideoEditorController extends ChangeNotifier {
       outputDirectory: outDir,
     );
     final trimCmd = "-ss $_trimStart -to $_trimEnd";
-    final String execute = ' -i ${file.path} $trimCmd -c copy $outputPath';
+    final String execute = ' $trimCmd -i ${file.path} -c copy $outputPath';
 
     debugPrint('VideoEditor - run export video command : [$execute]');
 
