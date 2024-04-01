@@ -1,21 +1,21 @@
 import 'dart:io';
+
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_full/ffmpeg_kit_config.dart';
 import 'package:ffmpeg_kit_flutter_full/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter_full/return_code.dart';
 import 'package:ffmpeg_kit_flutter_full/statistics.dart';
-import 'package:path/path.dart' as path;
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+import 'package:video_editor/domain/entities/cover_data.dart';
+import 'package:video_editor/domain/entities/cover_style.dart';
+import 'package:video_editor/domain/entities/crop_style.dart';
 import 'package:video_editor/domain/entities/file_format.dart';
+import 'package:video_editor/domain/entities/trim_style.dart';
 import 'package:video_editor/domain/helpers.dart';
 import 'package:video_editor/domain/thumbnails.dart';
 import 'package:video_player/video_player.dart';
-import 'package:path_provider/path_provider.dart';
-
-import 'package:video_editor/domain/entities/crop_style.dart';
-import 'package:video_editor/domain/entities/trim_style.dart';
-import 'package:video_editor/domain/entities/cover_style.dart';
-import 'package:video_editor/domain/entities/cover_data.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 class VideoMinDurationError extends Error {
@@ -87,7 +87,7 @@ class VideoEditorController extends ChangeNotifier {
           // https://github.com/flutter/flutter/issues/40429#issuecomment-549746165
           Platform.isIOS ? Uri.encodeFull(file.path) : file.path,
         )),
-        trimStyle = trimStyle ?? TrimSliderStyle(),
+        trimStyle = trimStyle ?? const TrimSliderStyle(),
         assert(maxDuration > minDuration,
             'The maximum duration must be bigger than the minimum duration');
 

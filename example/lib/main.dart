@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:video_editor_example/crop.dart';
-import 'package:video_editor_example/widgets/export_result.dart';
 import 'package:flutter/material.dart';
 import 'package:helpers/helpers.dart' show OpacityTransition;
 import 'package:image_picker/image_picker.dart';
 import 'package:video_editor/video_editor.dart';
+import 'package:video_editor_example/crop.dart';
+import 'package:video_editor_example/widgets/export_result.dart';
 
 void main() => runApp(
       MaterialApp(
@@ -157,8 +157,8 @@ class _VideoEditorState extends State<VideoEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
+    return PopScope(
+      canPop: false,
       child: Scaffold(
         backgroundColor: Colors.black,
         body: _controller.initialized
