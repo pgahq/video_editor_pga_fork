@@ -491,7 +491,7 @@ class VideoEditorController extends ChangeNotifier {
 
     final String tempPath =
         outputDirectory ?? (await getTemporaryDirectory()).path;
-    name ??= path.basenameWithoutExtension(file.path);
+    name ??= path.basenameWithoutExtension(path.normalize(file.path));
     final int epoch = DateTime.now().millisecondsSinceEpoch;
     return "$tempPath/${name}_$epoch.$extension";
   }
@@ -505,7 +505,7 @@ class VideoEditorController extends ChangeNotifier {
   }) async {
     final String tempPath =
         outputDirectory ?? (await getTemporaryDirectory()).path;
-    name ??= path.basenameWithoutExtension(filePath);
+    name ??= path.basenameWithoutExtension(path.normalize(filePath));
     final int epoch = DateTime.now().millisecondsSinceEpoch;
     return "$tempPath/${name}_$epoch.${format.extension}";
   }
