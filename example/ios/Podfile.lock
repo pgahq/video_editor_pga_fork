@@ -1,10 +1,10 @@
 PODS:
-  - ffmpeg-kit-ios-https (5.1)
-  - ffmpeg_kit_flutter (5.1.0):
-    - ffmpeg_kit_flutter/https (= 5.1.0)
+  - ffmpeg-kit-ios-full (6.0)
+  - ffmpeg_kit_flutter_full (6.0.3):
+    - ffmpeg_kit_flutter_full/full (= 6.0.3)
     - Flutter
-  - ffmpeg_kit_flutter/https (5.1.0):
-    - ffmpeg-kit-ios-https (= 5.1)
+  - ffmpeg_kit_flutter_full/full (6.0.3):
+    - ffmpeg-kit-ios-full (= 6.0)
     - Flutter
   - Flutter (1.0.0)
   - image_picker_ios (0.0.1):
@@ -23,26 +23,27 @@ PODS:
     - FlutterMacOS
   - video_player_avfoundation (0.0.1):
     - Flutter
+    - FlutterMacOS
   - video_thumbnail (0.0.1):
     - Flutter
     - libwebp
 
 DEPENDENCIES:
-  - ffmpeg_kit_flutter (from `.symlinks/plugins/ffmpeg_kit_flutter/ios`)
+  - ffmpeg_kit_flutter_full (from `.symlinks/plugins/ffmpeg_kit_flutter_full/ios`)
   - Flutter (from `Flutter`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
-  - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/ios`)
+  - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - video_thumbnail (from `.symlinks/plugins/video_thumbnail/ios`)
 
 SPEC REPOS:
   trunk:
-    - ffmpeg-kit-ios-https
+    - ffmpeg-kit-ios-full
     - libwebp
 
 EXTERNAL SOURCES:
-  ffmpeg_kit_flutter:
-    :path: ".symlinks/plugins/ffmpeg_kit_flutter/ios"
+  ffmpeg_kit_flutter_full:
+    :path: ".symlinks/plugins/ffmpeg_kit_flutter_full/ios"
   Flutter:
     :path: Flutter
   image_picker_ios:
@@ -50,20 +51,20 @@ EXTERNAL SOURCES:
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   video_player_avfoundation:
-    :path: ".symlinks/plugins/video_player_avfoundation/ios"
+    :path: ".symlinks/plugins/video_player_avfoundation/darwin"
   video_thumbnail:
     :path: ".symlinks/plugins/video_thumbnail/ios"
 
 SPEC CHECKSUMS:
-  ffmpeg-kit-ios-https: 8dffbe1623a2f227be98fc314294847a97f818e4
-  ffmpeg_kit_flutter: 17e9f35a4ec996ac55051c20be05240f2a0b53e8
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  ffmpeg-kit-ios-full: 0099a769d22114dde52cdc238397941c32f75d27
+  ffmpeg_kit_flutter_full: a2ad4ff5b14b7c040724edc8cd3bc293dd2d6d0f
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   image_picker_ios: 4a8aadfbb6dc30ad5141a2ce3832af9214a705b5
   libwebp: f62cb61d0a484ba548448a4bd52aabf150ff6eef
-  path_provider_foundation: c68054786f1b4f3343858c1e1d0caaded73f0be9
-  video_player_avfoundation: 81e49bb3d9fb63dccf9fa0f6d877dc3ddbeac126
+  path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
+  video_player_avfoundation: 2b4384f3b157206b5e150a0083cdc0c905d260d3
   video_thumbnail: c4e2a3c539e247d4de13cd545344fd2d26ffafd1
 
 PODFILE CHECKSUM: ccd901b1465efa56fa30557fdc5ae4eddcc3f504
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.15.2
