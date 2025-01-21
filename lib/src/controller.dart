@@ -389,7 +389,9 @@ class VideoEditorController extends ChangeNotifier {
       timeMs: startTrim.inMilliseconds,
       quality: coverThumbnailsQuality,
     );
-    updateSelectedCover(defaultCover);
+    if (defaultCover != null) {
+      updateSelectedCover(defaultCover);
+    }
   }
 
   /// Get the [selectedCover] notifier

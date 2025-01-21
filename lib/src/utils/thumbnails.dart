@@ -43,7 +43,7 @@ Stream<List<CoverData>> generateCoverThumbnails(
 
   for (int i = 0; i < quantity; i++) {
     try {
-      final CoverData bytes = await generateSingleCoverThumbnail(
+      final CoverData? bytes = await generateSingleCoverThumbnail(
         controller.file.path,
         timeMs: (controller.isTrimmed
                 ? (eachPart * i) + controller.startTrim.inMilliseconds
@@ -52,8 +52,8 @@ Stream<List<CoverData>> generateCoverThumbnails(
         quality: controller.coverThumbnailsQuality,
       );
 
-      if (bytes.thumbData != null) {
-        byteList.add(bytes);
+      if (bytes?.thumbData != null) {
+        byteList.add(bytes!);
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -66,17 +66,24 @@ Stream<List<CoverData>> generateCoverThumbnails(
 /// Generate a cover at [timeMs] in video
 ///
 /// Returns a [CoverData] depending on [timeMs] milliseconds
-Future<CoverData> generateSingleCoverThumbnail(
+Future<CoverData?> generateSingleCoverThumbnail(
   String filePath, {
   int timeMs = 0,
   int quality = 10,
 }) async {
-  final thumbData = await VideoThumbnail.thumbnailData(
-    imageFormat: ImageFormat.JPEG,
-    video: filePath,
-    timeMs: timeMs,
-    quality: quality,
-  );
+  try {
+    
+    final thumbData = await VideoThumbnail.thumbnailData(
+      imageFormat: ImageFormat.JPEG,
+      video: filePath,
+      timeMs: timeMs,
+      quality: quality,
+    );
 
-  return CoverData(thumbData: thumbData, timeMs: timeMs);
+    return CoverData(thumbData: thumbData, timeMs: timeMs);
+  } catch (e) {
+    debugPrint(e.toString());
+    return null;
+  }
+
 }
