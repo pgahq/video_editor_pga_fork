@@ -14,11 +14,11 @@ dependencies:
   flutter:
     sdk: flutter
 
-  path: ^1.8.3
-  path_provider: ^2.1.2
+  path: ^1.9.0
+  path_provider: ^2.1.5
   transparent_image: ^2.0.1 # show fade-in placeholder in thumbnails generation
-  video_player: ^2.8.3
-  video_thumbnail: ^0.5.3
+  video_player: ^2.9.2
+  get_thumbnail_video: ^0.7.3
   helpers: ^1.2.3
 
 dev_dependencies:

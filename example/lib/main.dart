@@ -99,7 +99,11 @@ class _VideoEditorState extends State<VideoEditor> {
         .then((_) => setState(() {}))
         .catchError((error) {
       // handle minumum duration bigger than video duration error
-      Navigator.pop(context);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
+      });
     }, test: (e) => e is VideoMinDurationError);
   }
 
