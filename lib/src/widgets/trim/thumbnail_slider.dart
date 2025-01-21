@@ -1,24 +1,20 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:video_editor/domain/bloc/controller.dart';
-import 'package:video_editor/domain/entities/transform_data.dart';
-import 'package:video_editor/domain/helpers.dart';
-import 'package:video_editor/domain/thumbnails.dart';
-import 'package:video_editor/ui/crop/crop_grid_painter.dart';
-import 'package:video_editor/ui/image_viewer.dart';
-import 'package:video_editor/ui/transform.dart';
+import 'package:video_editor/src/controller.dart';
+import 'package:video_editor/src/utils/helpers.dart';
+import 'package:video_editor/src/utils/thumbnails.dart';
+import 'package:video_editor/src/models/transform_data.dart';
+import 'package:video_editor/src/widgets/crop/crop_grid_painter.dart';
+import 'package:video_editor/src/widgets/image_viewer.dart';
+import 'package:video_editor/src/widgets/transform.dart';
 
 class ThumbnailSlider extends StatefulWidget {
   const ThumbnailSlider({
     super.key,
     required this.controller,
     this.height = 60,
-    this.quality = 10,
   });
-
-  /// The [quality] param specifies the quality of the generated thumbnails, from 0 to 100, (([more info](https://pub.dev/packages/video_thumbnail)))
-  final int quality;
 
   /// The [height] param specifies the height of the generated thumbnails
   final double height;
@@ -82,7 +78,6 @@ class _ThumbnailSliderState extends State<ThumbnailSlider> {
   Stream<List<Uint8List>> _generateThumbnails() => generateTrimThumbnails(
         widget.controller,
         quantity: _thumbnailsCount,
-        quality: widget.quality,
       );
 
   /// Returns the max size the layout should take with the rect value

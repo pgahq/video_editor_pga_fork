@@ -1,9 +1,9 @@
 name: video_editor
-version: 2.4.0
+version: 3.0.0
 description: |
  A flutter package for editing video with fully customizable UI.
  Supports crop, trim, rotation and cover selection.
- Video and cover exportation is handled by ffmpeg
+ Provides commands to run in order to export the video or cover.
 repository: https://github.com/LeGoffMael/video_editor
 
 environment:
@@ -14,7 +14,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  ffmpeg_kit_flutter_full: ^6.0.3
   path: ^1.8.3
   path_provider: ^2.1.2
   transparent_image: ^2.0.1 # show fade-in placeholder in thumbnails generation
