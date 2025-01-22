@@ -1,7 +1,46 @@
+## 3.0.0
+
+> **Note**
+> If you continue to use the previous versions (from 1.2.3 to 2.4.0) your project might be subject to a GPL license.
+
+- Removed dependency to FFmpeg from this package ([reasons](https://github.com/LeGoffMael/video_editor#1-why-was-ffmpeg-removed-from-this-package-))
+
+Before:
+
+```dart
+// Basic export video function
+Future<void> exportVideo() => _controller.exportVideo(
+  onCompleted: (file) {}, // show the exported video
+);
+```
+
+After:
+```dart
+/// Basic export video function
+Future<void> exportVideo() async {
+  // You could generate your command line yourself or if you want to continue to use FFmpeg : 
+  final config = VideoFFmpegVideoEditorConfig(_controller);
+  // Returns the generated command and the output path
+  final FFmpegVideoEditorExecute execute = await config.getExecuteConfig();
+
+  // ... handle the video exportation yourself, using ffmpeg_kit_flutter, your own video server, ... (more example in the example app)
+}
+```
+
+- New complete control over the command generation using `commandBuilder` in `VideoFFmpegVideoEditorConfig`
+  - Removed `VideoExportPreset`, you can specifies it using the `commandBuilder`.
+  - Removed `customInstruction`, you can now custom the command using the `commandBuilder`.
+- The exportation is now very fast if there is no filter [#140](https://github.com/LeGoffMael/video_editor/issues/140)
+- Fix assert error while triming [#157](https://github.com/LeGoffMael/video_editor/issues/157)
+- New `coverThumbnailsQuality` and `trimThumbnailsQuality` in controller
+  - Removed `quality` in `CoverSelection`, instead uses `coverThumbnailsQuality`
+  - Removed `quality` in `ThumbnailSlider`, instead uses `trimThumbnailsQuality`
+  - Removed `quality` in `TrimSlider`, instead uses `trimThumbnailsQuality`
+
 ## 2.4.0
 
 - Fix update TrimSlider trim values from controller [#141](https://github.com/LeGoffMael/video_editor/pull/141)
-- Add `scrollController` param in TrimSlider [#139](https://github.com/LeGoffMael/video_editor/pull/139)
+- Add `scrollController` param in TrimSlider [#139](https://github.com/LeGoffMael/video_editor/pull/139) by [@jcsena](https://github.com/jcsena)
 
 - Some controller's methods name has been changed :
 

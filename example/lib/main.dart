@@ -1,11 +1,11 @@
 import 'dart:io';
 
+import 'package:video_editor_example/crop_page.dart';
+import 'package:video_editor_example/export_service.dart';
+import 'package:video_editor_example/widgets/export_result.dart';
 import 'package:flutter/material.dart';
-import 'package:helpers/helpers.dart' show OpacityTransition;
 import 'package:image_picker/image_picker.dart';
 import 'package:video_editor/video_editor.dart';
-import 'package:video_editor_example/crop.dart';
-import 'package:video_editor_example/widgets/export_result.dart';
 
 void main() => runApp(
       MaterialApp(
@@ -51,7 +51,7 @@ class _VideoEditorExampleState extends State<VideoEditorExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Image / Video Picker")),
+      appBar: AppBar(title: const Text("Video Picker")),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -99,15 +99,20 @@ class _VideoEditorState extends State<VideoEditor> {
         .then((_) => setState(() {}))
         .catchError((error) {
       // handle minumum duration bigger than video duration error
-      Navigator.pop(context);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
+      });
     }, test: (e) => e is VideoMinDurationError);
   }
 
   @override
-  void dispose() {
+  void dispose() async {
     _exportingProgress.dispose();
     _isExporting.dispose();
     _controller.dispose();
+    ExportService.dispose();
     super.dispose();
   }
 
@@ -122,12 +127,23 @@ class _VideoEditorState extends State<VideoEditor> {
   void _exportVideo() async {
     _exportingProgress.value = 0;
     _isExporting.value = true;
-    // NOTE: To use `-crf 1` and [VideoExportPreset] you need `ffmpeg_kit_flutter_min_gpl` package (with `ffmpeg_kit` only it won't work)
-    await _controller.exportVideo(
+
+    final config = VideoFFmpegVideoEditorConfig(
+      _controller,
       // format: VideoExportFormat.gif,
-      // preset: VideoExportPreset.medium,
-      // customInstruction: "-crf 17",
-      onProgress: (stats, value) => _exportingProgress.value = value,
+      // commandBuilder: (config, videoPath, outputPath) {
+      //   final List<String> filters = config.getExportFilters();
+      //   filters.add('hflip'); // add horizontal flip
+
+      //   return '-i $videoPath ${config.filtersCmd(filters)} -preset ultrafast $outputPath';
+      // },
+    );
+
+    await ExportService.runFFmpegCommand(
+      await config.getExecuteConfig(),
+      onProgress: (stats) {
+        _exportingProgress.value = config.getFFmpegProgress(stats.getTime());
+      },
       onError: (e, s) => _showErrorSnackBar("Error on export video :("),
       onCompleted: (file) {
         _isExporting.value = false;
@@ -142,7 +158,15 @@ class _VideoEditorState extends State<VideoEditor> {
   }
 
   void _exportCover() async {
-    await _controller.extractCover(
+    final config = CoverFFmpegVideoEditorConfig(_controller);
+    final execute = await config.getExecuteConfig();
+    if (execute == null) {
+      _showErrorSnackBar("Error on cover exportation initialization.");
+      return;
+    }
+
+    await ExportService.runFFmpegCommand(
+      execute,
       onError: (e, s) => _showErrorSnackBar("Error on cover exportation :("),
       onCompleted: (cover) {
         if (!mounted) return;
@@ -185,9 +209,10 @@ class _VideoEditorState extends State<VideoEditor> {
                                               controller: _controller),
                                           AnimatedBuilder(
                                             animation: _controller.video,
-                                            builder: (_, __) =>
-                                                OpacityTransition(
-                                              visible: !_controller.isPlaying,
+                                            builder: (_, __) => AnimatedOpacity(
+                                              opacity:
+                                                  _controller.isPlaying ? 0 : 1,
+                                              duration: kThemeAnimationDuration,
                                               child: GestureDetector(
                                                 onTap: _controller.video.play,
                                                 child: Container(
@@ -261,16 +286,17 @@ class _VideoEditorState extends State<VideoEditor> {
                                 ),
                                 ValueListenableBuilder(
                                   valueListenable: _isExporting,
-                                  builder: (_, bool export, __) =>
-                                      OpacityTransition(
-                                    visible: export,
-                                    child: AlertDialog(
-                                      title: ValueListenableBuilder(
-                                        valueListenable: _exportingProgress,
-                                        builder: (_, double value, __) => Text(
-                                          "Exporting video ${(value * 100).ceil()}%",
-                                          style: const TextStyle(fontSize: 12),
-                                        ),
+                                  builder: (_, bool export, Widget? child) =>
+                                      AnimatedSize(
+                                    duration: kThemeAnimationDuration,
+                                    child: export ? child : null,
+                                  ),
+                                  child: AlertDialog(
+                                    title: ValueListenableBuilder(
+                                      valueListenable: _exportingProgress,
+                                      builder: (_, double value, __) => Text(
+                                        "Exporting video ${(value * 100).ceil()}%",
+                                        style: const TextStyle(fontSize: 12),
                                       ),
                                     ),
                                   ),
@@ -324,7 +350,7 @@ class _VideoEditorState extends State<VideoEditor> {
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute<void>(
-                    builder: (context) => CropScreen(controller: _controller),
+                    builder: (context) => CropPage(controller: _controller),
                   ),
                 ),
                 icon: const Icon(Icons.crop),
@@ -367,16 +393,17 @@ class _VideoEditorState extends State<VideoEditor> {
           _controller.video,
         ]),
         builder: (_, __) {
-          final duration = _controller.videoDuration.inSeconds;
-          final pos = _controller.trimPosition * duration;
+          final int duration = _controller.videoDuration.inSeconds;
+          final double pos = _controller.trimPosition * duration;
 
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: height / 4),
             child: Row(children: [
               Text(formatter(Duration(seconds: pos.toInt()))),
               const Expanded(child: SizedBox()),
-              OpacityTransition(
-                visible: _controller.isTrimming,
+              AnimatedOpacity(
+                opacity: _controller.isTrimming ? 1 : 0,
+                duration: kThemeAnimationDuration,
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   Text(formatter(_controller.startTrim)),
                   const SizedBox(width: 10),
